@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import { supabase } from "../config/supabase";
 import { AuthRequest } from "../midleware/auth";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
+import axios from "axios";
 
 type TxBody = {
   type: "pemasukan" | "pengeluaran";
@@ -26,7 +27,7 @@ export const addTransaction = async (req: AuthRequest, res: Response) => {
         .json({ error: "Type & valid amount are required" });
     }
 
-    // Ambil semua transaksi user untuk hitung saldo
+    // Ambil transaksi lama
     const { data: transactions, error: fetchError } = await supabase
       .from("transactions")
       .select("amount, type")
@@ -47,7 +48,7 @@ export const addTransaction = async (req: AuthRequest, res: Response) => {
 
     const saldo = totalPemasukan - totalPengeluaran;
 
-    // Cek saldo cukup untuk pengeluaran
+    // Cek saldo cukup
     if (type === "pengeluaran" && amount > saldo) {
       return res.status(400).json({ error: "Saldo kamu tidak cukup" });
     }
@@ -68,9 +69,26 @@ export const addTransaction = async (req: AuthRequest, res: Response) => {
 
     if (insertError) throw insertError;
 
-    // Update saldo setelah transaksi
     const saldoBaru =
       type === "pemasukan" ? saldo + Number(amount) : saldo - Number(amount);
+
+    // Kirim notifikasi ke n8n
+    try {
+      await axios.post(
+        "https://c58f739204aa.ngrok-free.app/webhook/transaction-notif",
+        {
+          description: description,
+          type: type,
+          amount: amount,
+          saldoBaru: saldoBaru,
+          waktu: new Date().toLocaleString(),
+        }
+      );
+
+      console.log(type);
+    } catch (notifyErr) {
+      console.error("Gagal kirim notifikasi ke n8n:");
+    }
 
     return res.status(201).json({
       message: "Transaksi berhasil ditambahkan",
@@ -292,9 +310,14 @@ export const downloadReport = async (req: AuthRequest, res: Response) => {
             {
               image: `data:image/png;base64,${logoBase64}`,
               width: 100,
+              style: "display : flex",
             },
             [
-              { text: "FYNEST - APP", style: "appTitle" },
+              {
+                text: "FYNEST - APP",
+                style: "appTitle",
+                margin: [0, 25, 0, 0],
+              },
               {
                 text: "APLIKASI PENCATAT KEUANGAN MODERN",
                 style: "appSubtitle",

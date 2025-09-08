@@ -28,7 +28,7 @@ export const authenticate = (
     req.user = {
       id: decoded.id || decoded.userId,
       email: decoded.email,
-      role: decoded.role, // ✅ Simpan role
+      role: decoded.role,
     };
 
     next();

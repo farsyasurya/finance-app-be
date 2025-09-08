@@ -9,6 +9,7 @@ dotenv.config();
 
 import authRoutes from "./routes/route";
 import transactionRoutes from "./routes/transaction";
+import axios from "axios";
 
 const app = express();
 
@@ -43,9 +44,6 @@ app.use(
 // === Routes ===
 app.use("/auth", authRoutes);
 app.use("/transactions", transactionRoutes);
-
-// === Root endpoint ===
-app.get("/", (req, res) => res.send("Finance backend running"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

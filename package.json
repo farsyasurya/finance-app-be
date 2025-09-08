@@ -17,6 +17,7 @@
     "@types/node-fetch": "^2.6.13",
     "@types/pdfkit": "^0.17.2",
     "@types/pdfmake": "^0.2.11",
+    "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
@@ -28,7 +29,8 @@
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^3.3.2",
     "pdfkit": "^0.17.1",
-    "pdfmake": "^0.2.20"
+    "pdfmake": "^0.2.20",
+    "puppeteer": "^24.18.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
